@@ -32,9 +32,7 @@ class RowChecker:
     def __init__(
         self,
         sample_col="sample",
-        first_col="fastq_1",
-        second_col="fastq_2",
-        single_col="single_end",
+        first_col="scientific_name",
         **kwargs,
     ):
         """
@@ -55,8 +53,8 @@ class RowChecker:
         super().__init__(**kwargs)
         self._sample_col = sample_col
         self._first_col = first_col
-        self._second_col = second_col
-        self._single_col = single_col
+        #self._second_col = second_col
+        #self._single_col = single_col
         self._seen = set()
         self.modified = []
 
@@ -71,8 +69,8 @@ class RowChecker:
         """
         self._validate_sample(row)
         self._validate_first(row)
-        self._validate_second(row)
-        self._validate_pair(row)
+        #self._validate_second(row)
+        #self._validate_pair(row)
         self._seen.add((row[self._sample_col], row[self._first_col]))
         self.modified.append(row)
 
@@ -81,13 +79,13 @@ class RowChecker:
         if len(row[self._sample_col]) <= 0:
             raise AssertionError("Sample input is required.")
         # Sanitize samples slightly.
-        row[self._sample_col] = row[self._sample_col].replace(" ", "_")
+        #row[self._sample_col] = row[self._sample_col].replace(" ", "_")
 
     def _validate_first(self, row):
         """Assert that the first FASTQ entry is non-empty and has the right format."""
         if len(row[self._first_col]) <= 0:
-            raise AssertionError("At least the first FASTQ file is required.")
-        self._validate_fastq_format(row[self._first_col])
+            raise AssertionError("scientific_name column is required.")
+        #self._validate_fastq_format(row[self._first_col])
 
     def _validate_second(self, row):
         """Assert that the second FASTQ entry has the right format if it exists."""
@@ -127,7 +125,7 @@ class RowChecker:
         for row in self.modified:
             sample = row[self._sample_col]
             seen[sample] += 1
-            row[self._sample_col] = f"{sample}_T{seen[sample]}"
+            #row[self._sample_col] = f"{sample}_T{seen[sample]}"
 
 
 def read_head(handle, num_lines=10):
@@ -188,7 +186,7 @@ def check_samplesheet(file_in, file_out):
         https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/samplesheet/samplesheet_test_illumina_amplicon.csv
 
     """
-    required_columns = {"sample", "fastq_1", "fastq_2"}
+    required_columns = {"sample","scientific_name"}
     # See https://docs.python.org/3.9/library/csv.html#id3 to read up on `newline=""`.
     with file_in.open(newline="") as in_handle:
         reader = csv.DictReader(in_handle, dialect=sniff_format(in_handle))
