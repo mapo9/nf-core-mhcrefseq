@@ -1,4 +1,5 @@
 process SAMPLESHEET_CHECK {
+    debug true
     tag "$samplesheet"
     label 'process_single'
 

@@ -46,7 +46,11 @@ include { INPUT_CHECK } from '../subworkflows/local/input_check'
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+include { CUSTOM_DUMPSOFTWAREVERSIONS   } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+include { DOWNLOAD_FASTA                } from '../modules/local/download_fasta'
+include { MERGE_FASTAS                  } from '../modules/local/merge_fastas'
+include { CDHIT_CDHIT                   } from '../modules/local/cdhit'
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -72,7 +76,21 @@ workflow MHCREFSEQ {
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     // ! There is currently no tooling to help you write a sample sheet schema
 
-    INPUT_CHECK.out.species.dump(tag:"test")
+
+    // Download the fastas
+    DOWNLOAD_FASTA ( INPUT_CHECK.out.species )
+
+    // group fastas together for merging
+    fasta_ch = DOWNLOAD_FASTA.out.organism_fasta.groupTuple()
+
+    // Merge the fastas
+    MERGE_FASTAS ( fasta_ch )
+
+    // CD-HIT for clustering
+    CDHIT_CDHIT ( MERGE_FASTAS.out.combined_fasta )
+
+    
+    
 
 
 
