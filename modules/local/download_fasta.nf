@@ -4,7 +4,7 @@ process DOWNLOAD_FASTA {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'oras://community.wave.seqera.io/library/jq_curl_pip:91d57da22309fc07' :
+        'oras://community.wave.seqera.io/library/curl_pip_jq_jqed:afc2a1be44f51a65' :
         'community.wave.seqera.io/library/curl_jq_pip_jqed:73b009f6f31f8b6f' }"
 
     input:
