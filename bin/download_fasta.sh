@@ -56,9 +56,9 @@ if [ -z "$PROTEOMES" ]; then
     echo $GENUS
     PROTEOMES=$(curl -s "https://rest.uniprot.org/proteomes/search?query=taxonomy_name:$GENUS+AND+proteome_type:reference&format=list")
 
-    for SPECIES_PROTEOME in $PROTEOMES; do
-        echo $SPECIES_PROTEOME
-        curl "https://rest.uniprot.org/uniprotkb/stream?compressed=false&format=fasta&query=(proteome:$SPECIES_PROTEOME)" -o ${OUT_PATH}/${ORGANISM_NAME}_reference.fasta
+    for GENUS_SPECIES_PROTEOME in $PROTEOMES; do
+        echo $GENUS_SPECIES_PROTEOME
+        curl "https://rest.uniprot.org/uniprotkb/stream?compressed=false&format=fasta&query=(proteome:$GENUS_SPECIES_PROTEOME)" -o ${OUT_PATH}/${ORGANISM_NAME}_reference.fasta
 
         # Check if related species FASTA file is non-empty
         if [[ -s ${OUT_PATH}/${ORGANISM_NAME}_reference.fasta ]]; then
@@ -66,4 +66,9 @@ if [ -z "$PROTEOMES" ]; then
             break
         fi
     done
+fi
+
+echo "\n"
+if [ -n "$GENUS_SPECIES_PROTEOME" ]; then
+    echo "$ORGANISM_NAME $GENUS_SPECIES_PROTEOME" >> "${OUT_PATH}/failed_proteomes.txt"
 fi
