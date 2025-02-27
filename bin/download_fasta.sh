@@ -68,7 +68,5 @@ if [ -z "$PROTEOMES" ]; then
     done
 fi
 
-echo "\n"
-if [ -n "$GENUS_SPECIES_PROTEOME" ]; then
-    echo "$ORGANISM_NAME $GENUS_SPECIES_PROTEOME" >> "${OUT_PATH}/failed_proteomes.txt"
-fi
+
+echo "$ORGANISM_NAME $GENUS_SPECIES_PROTEOME" >> "${OUT_PATH}/failed_proteomes.txt"
