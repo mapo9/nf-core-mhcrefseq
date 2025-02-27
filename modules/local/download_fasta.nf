@@ -12,7 +12,7 @@ process DOWNLOAD_FASTA {
 
     output:
     tuple val(meta), path("${organism.replace(" ", "_")}/${organism.replace(" ", "_")}_*reference.fasta")  , emit: organism_fasta
-    tuple val(meta), path("${organism.replace(" ", "_")}/failed_proteomes.txt")  , emit: organism_fasta
+    tuple val(meta), path("${organism.replace(" ", "_")}/failed_proteomes.txt")  , emit: failed_proteomes
     path "versions.yml"         , emit: versions
 
     when:
