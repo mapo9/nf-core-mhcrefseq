@@ -34,31 +34,17 @@ mkdir -p "$OUT_PATH"
 ORGANISM="${ORGANISM// /+}"
 ORGANISM_NAME="${ORGANISM//+/_}"
 
-taxonomy_id=$(curl -s "https://rest.uniprot.org/taxonomy/search?query=$ORGANISM_NAME" | jq -r '.results[0].taxonId')
+# find list of reference proteomes associated to species
+PROTEOMES=$(curl -s "https://rest.uniprot.org/proteomes/search?query=taxonomy_name:$ORGANISM+AND+proteome_type:reference&format=list")
 
-# Download ref ids for this genus
-curl "https://rest.uniprot.org/uniprotkb/stream?query=taxonomy_name:$ORGANISM&format=fasta" -o ${OUT_PATH}/${ORGANISM_NAME}_reference.fasta
+# iterate over species-proteomes in list
+for SPECIES_PROTEOME in $PROTEOMES; do
+    # download proteome and save
+    curl "https://rest.uniprot.org/uniprotkb/stream?compressed=false&format=fasta&query=(proteome:$SPECIES_PROTEOME)" -o ${OUT_PATH}/${ORGANISM_NAME}_reference.fasta
 
-# Check if the downloaded FASTA file is empty
-if [[ ! -s ${OUT_PATH}/${ORGANISM_NAME}_reference.fasta ]]; then
-    echo "FASTA file for $ORGANISM_NAME is empty. Trying closely related species..."
-
-    # Query UniProt for related species by genus
-    GENUS=$(echo "$ORGANISM" | awk -F'+' '{print $1}')  # Get genus name from the organism
-    echo "GENUS $GENUS"
-    RELATED_SPECIES=$(curl -s "https://rest.uniprot.org/proteomes/search?query=taxonomy_name:$GENUS+AND+proteome_type:reference&format=list")
-
-    # Try downloading FASTA for related species
-    for RELATED_ORGANISM in $RELATED_SPECIES; do
-        echo "Attempting to download FASTA for closely related species: $RELATED_ORGANISM..."
-        curl "https://rest.uniprot.org/uniprotkb/stream?compressed=false&format=fasta&query=(proteome:$RELATED_ORGANISM)" -o ${OUT_PATH}/${ORGANISM_NAME}_reference.fasta
-
-        # Check if related species FASTA file is non-empty
-        if [[ -s ${OUT_PATH}/${ORGANISM_NAME}_reference.fasta ]]; then
-            echo "Successfully downloaded FASTA for $ORGANISM_NAME: ${ORGANISM_NAME}_${RELATED_ORGANISM}_reference.fasta"
-            break
-        fi
-    done
-else
-    echo "Successfully downloaded FASTA for $ORGANISM: ${ORGANISM_NAME}_reference.fasta"
-fi
+    # Check if related species FASTA file is non-empty
+    if [[ -s ${OUT_PATH}/${ORGANISM_NAME}_reference.fasta ]]; then
+        echo "Successfully downloaded FASTA for $ORGANISM_NAME: ${ORGANISM_NAME}_${RELATED_ORGANISM}_reference.fasta"
+        break
+    fi
+done
