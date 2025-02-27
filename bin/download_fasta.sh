@@ -48,3 +48,21 @@ for SPECIES_PROTEOME in $PROTEOMES; do
         break
     fi
 done
+
+# if proteomes is empty search in genus
+if [ -z "$PROTEOMES" ]; then
+    echo "No reference proteomes found for $ORGANISM. Trying genus level search..."
+    GENUS=$(echo "$ORGANISM" | awk -F'+' '{print $1}')
+    echo $GENUS
+    PROTEOMES=$(curl -s "https://rest.uniprot.org/proteomes/search?query=taxonomy_name:$GENUS+AND+proteome_type:reference&format=list")
+    echo $PROTEOMES
+
+    for SPECIES_PROTEOME in $PROTEOMES; do
+        curl "https://rest.uniprot.org/uniprotkb/stream?compressed=false&format=fasta&query=(proteome:$SPECIES_PROTEOME)" -o ${OUT_PATH}/${ORGANISM_NAME}_reference.fasta
+
+        if [[ -s ${OUT_PATH}/${GENUS}_reference.fasta ]]; then
+            echo "Successfully downloaded FASTA for $ORGANISM_NAME: ${ORGANISM_NAME}_${RELATED_ORGANISM}_reference.fasta"
+            break
+        fi
+    done
+fi
