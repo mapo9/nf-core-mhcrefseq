@@ -34,6 +34,8 @@ mkdir -p "$OUT_PATH"
 ORGANISM="${ORGANISM// /+}"
 ORGANISM_NAME="${ORGANISM//+/_}"
 
+echo $ORGANISM
+
 # find list of reference proteomes associated to species
 PROTEOMES=$(curl -s "https://rest.uniprot.org/proteomes/search?query=taxonomy_name:$ORGANISM+AND+proteome_type:reference&format=list")
 
@@ -50,10 +52,11 @@ for SPECIES_PROTEOME in $PROTEOMES; do
 done
 
 # if proteomes is empty search in genus
-if [ -z "$PROTEOMES" ]; then
+if [ -z "$PROTEOMES" ] || ! [[ -s ${OUT_PATH}/${ORGANISM_NAME}_reference.fasta ]]; then
     echo "No reference proteomes found for $ORGANISM. Trying genus level search..."
     GENUS=$(echo "$ORGANISM" | awk -F'+' '{print $1}')
-    echo $GENUS
+    echo "Organism" $ORGANISM
+    echo "Genus" $GENUS
     PROTEOMES=$(curl -s "https://rest.uniprot.org/proteomes/search?query=taxonomy_name:$GENUS+AND+proteome_type:reference&format=list")
 
     for GENUS_SPECIES_PROTEOME in $PROTEOMES; do
