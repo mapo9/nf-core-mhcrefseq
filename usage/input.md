@@ -56,7 +56,7 @@ Two further gotchas when the input is a genus (or higher):
 ### Recommendation
 
 - Supply **species binomials** (`Escherichia coli`, `Listeria monocytogenes`, `Salmonella enterica`).
-- If you want a genus-wide reference, enumerate every species you care about as separate rows under the same `sample`.
+- If you want a genus-wide reference, enumerate every species you care about as separate rows under the same `sample`. For a small number of genera, the standalone notebook `bin/expand_genera.ipynb` automates this by drawing a seeded random sample of GTDB R226 species per genus — see [genus_expansion.md](./genus_expansion.md).
 - If a species has no UniProt reference proteome, decide consciously whether the genus-level fallback is acceptable. The current pipeline does not warn you when it falls back.
 
 ## The `failed_proteomes.txt` log
@@ -82,3 +82,4 @@ Update these when you are ready to ship a proper release.
 ## See also
 
 - [Running the pipeline](./running.md)
+- [Expanding genus inputs into a species panel](./genus_expansion.md)
