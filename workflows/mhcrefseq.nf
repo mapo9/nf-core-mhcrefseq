@@ -77,11 +77,19 @@ workflow MHCREFSEQ {
     // ! There is currently no tooling to help you write a sample sheet schema
 
 
-    // Download the fastas
-    DOWNLOAD_FASTA ( INPUT_CHECK.out.species )
+    // Download each unique organism only once, then re-fan to all samples that need it
+    species_ch = INPUT_CHECK.out.species  // [meta, organism] per samplesheet row
 
-    // group fastas together for merging
-    fasta_ch = DOWNLOAD_FASTA.out.organism_fasta.groupTuple()
+    DOWNLOAD_FASTA (
+        species_ch.map { meta, organism -> organism }.unique()
+    )
+    // DOWNLOAD_FASTA.out.organism_fasta = [organism, fasta]
+
+    // Pair each downloaded organism with every sample that requested it
+    fasta_ch = DOWNLOAD_FASTA.out.organism_fasta
+        .combine( species_ch.map { meta, organism -> [organism, meta] }, by: 0 )
+        .map { organism, fasta, meta -> [meta, fasta] }
+        .groupTuple()
 
     // Merge the fastas
     MERGE_FASTAS ( fasta_ch )

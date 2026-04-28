@@ -1,5 +1,5 @@
 process DOWNLOAD_FASTA {
-    tag "$meta.id"
+    tag "$organism"
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
@@ -8,11 +8,11 @@ process DOWNLOAD_FASTA {
         'community.wave.seqera.io/library/curl_jq_pip_jqed:73b009f6f31f8b6f' }"
 
     input:
-    tuple val(meta), val(organism)
+    val(organism)
 
     output:
-    tuple val(meta), path("${organism.replace(" ", "_")}/${organism.replace(" ", "_")}_*reference.fasta")  , emit: organism_fasta
-    tuple val(meta), path("${organism.replace(" ", "_")}/failed_proteomes.txt")  , emit: failed_proteomes
+    tuple val(organism), path("${organism.replace(" ", "_")}/${organism.replace(" ", "_")}_*reference.fasta")  , emit: organism_fasta
+    tuple val(organism), path("${organism.replace(" ", "_")}/failed_proteomes.txt")  , emit: failed_proteomes
     path "versions.yml"         , emit: versions
 
     when:
